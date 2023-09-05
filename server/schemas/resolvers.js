@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-// const stripeSecretKey = process.env.STRIPE_SK;
 const stripe = require("stripe")(
   "sk_test_51NdeCcJJYT86npXC8Avw8l7TZLOZAcw07zfHSpQlECD9FMsyrv7d7u2b4kIHKzXpM0jz95vv8NBw1cXXKO41AHhZ009UuOCiP7"
 );
@@ -221,13 +220,6 @@ const resolvers = {
     ) => {
       if (context.user) {
         try {
-          const checkDuplicate = await User.findOne({
-            _id: context.user._id,
-            "income.description": name,
-          });
-          if (checkDuplicate) {
-            throw new Error("Income already exists.");
-          }
           const updatedUser = await User.findByIdAndUpdate(
             { _id: context.user._id },
             {
@@ -270,7 +262,7 @@ const resolvers = {
             { _id: context.user._id, "incomes._id": incomeID },
             { $set: { "incomes.$": newIncome } },
             { new: true }
-          );
+          );          
           return updatedUser;
         } catch (error) {
           throw new Error(error);
@@ -301,13 +293,6 @@ const resolvers = {
     ) => {
       if (context.user) {
         try {
-          const checkDuplicate = await User.findOne({
-            _id: context.user._id,
-            "expenses.description": name,
-          });
-          if (checkDuplicate) {
-            throw new Error("Expense already exists.");
-          }
           const updateUser = await User.findByIdAndUpdate(
             { _id: context.user._id },
             {
@@ -358,7 +343,7 @@ const resolvers = {
           throw new Error(error);
         }
       }
-    },
+    },    
     removeExpense: async (parent, { expenseID }, context) => {
       if (context.user) {
         try {
@@ -423,7 +408,7 @@ const resolvers = {
           };
           const updatedUser = await User.findOneAndUpdate(
             { _id: context.user._id, "categories._id": id },
-            { $set: { categories: newCategory } },
+            { $set: { "categories.$": newCategory } },
             { new: true }
           );
           return updatedUser;
@@ -475,28 +460,30 @@ const resolvers = {
             },
             { new: true }
           );
+
           return updateUser;
         } catch (err) {
           throw new Error("try again");
         }
       }
     },
-    editBudget: async (parent, { budgetID, budgetData }, context) => {
+    editBudget: async (parent, { id, budgetData }, context) => {
       if (context.user) {
         try {
           const userData = await User.findOne({
             _id: context.user._id,
-            "budgets._id": budgetID,
+            "budgets._id": id,
           });
           const existingBudget = userData.budgets.find(
-            (budget) => budget._id == budgetID
+            (budget) => budget._id == id
           );
           const newBudgetData = {
             category: budgetData.category || existingBudget.category,
             amount: budgetData.amount || existingBudget.amount,
+            name: budgetData.name || existingBudget.name,
           };
           const updatedUser = await User.findOneAndUpdate(
-            { _id: context.user._id, "budgets._id": budgetID },
+            { _id: context.user._id, "budgets._id": id },
             { $set: { "budgets.$": newBudgetData } },
             { new: true }
           );

@@ -32,14 +32,16 @@ const typeDefs = gql`
     amount: Float
     date: String
     isRecurring: Boolean
+    name: String
   }
   type Expense {
     _id: ID!
-    description: String!
+    description: String
     category: Category
     amount: Float
     date: String
     isRecurring: Boolean
+    name: String
   }
 
   type SuccessMsg {
@@ -125,11 +127,11 @@ const typeDefs = gql`
       isExpense: Boolean!
       isBudget: Boolean!
     ): Category
-    editCategory(id: ID!, categoryData: categoryInput!): Category
+    editCategory(id: ID!, categoryData: categoryInput!): User
     removeCategory(category: ID!): User
 
     addBudget(amount: Float!, category: ID!, name: String): User
-    editBudget(id: ID!, budgetData: budgetInput): User
+    editBudget(id: ID!, budgetData: budgetInput!): User
     removeBudget(budgetID: ID!): User
 
     addDonation(amount: Float): Donation
@@ -144,11 +146,11 @@ const typeDefs = gql`
   }
 
   input expenseInput {
-    description: String!
-    amount: Float!
-    category: ID!
-    date: String!
-    isRecurring: Boolean!
+    description: String
+    amount: Float
+    category: ID
+    date: String
+    isRecurring: Boolean
   }
 
   input categoryInput {

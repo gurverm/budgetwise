@@ -1,21 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { gql } from "@apollo/client";
-import {
-  FormGroup,
-  FormSelect,
-  FormCheck,
-  ListGroup,
-  InputGroup,
-  Alert,
-} from "react-bootstrap";
-import { Button } from "@chakra-ui/react";
+import React, { useEffect, useState } from "react";
+
 import { useMutation, useQuery } from "@apollo/client";
-import {
-  ADD_CATEGORY,
-  REMOVE_CATEGORY,
-  EDIT_CATEGORY,
-} from "../utils/mutations";
-import { QUERY_ALL_CATEGORIES } from "../utils/queries";
+import { Button } from "@chakra-ui/react";
+import { Alert, FormCheck, FormGroup, ListGroup } from "react-bootstrap";
+import { ADD_CATEGORY, REMOVE_CATEGORY } from "../utils/mutations";
+import { QUERY_ALL_CATEGORIES, QUERY_CATEGORY_BY_TYPE } from "../utils/queries";
 
 const CategoryComponent = () => {
   const [categories, setCategories] = useState([]);
@@ -26,7 +15,7 @@ const CategoryComponent = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const successMessageDuration = 3000;
   // Queries all existing categories
-  const { loading, error, data } = useQuery(QUERY_ALL_CATEGORIES);
+  const { data } = useQuery(QUERY_ALL_CATEGORIES);
   const categoryList = data?.allCategories || [];
 
   const handleIsIncome = () => {
@@ -42,8 +31,6 @@ const CategoryComponent = () => {
 
   const [deleteCategory] = useMutation(REMOVE_CATEGORY);
 
-  const [editCategory] = useMutation(EDIT_CATEGORY);
-
   const handleNewCategoryChange = (event) => {
     setNewCategory(event.target.value);
   };
@@ -58,6 +45,7 @@ const CategoryComponent = () => {
       };
     }
   }, [successMessage]);
+
   const handleAddCategory = () => {
     if (newCategory) {
       addCategory({
@@ -67,7 +55,10 @@ const CategoryComponent = () => {
           isExpense: isExpense,
           isBudget: isBudget,
         },
-        refetchQueries: [{ query: QUERY_ALL_CATEGORIES }],
+        refetchQueries: [
+          { query: QUERY_ALL_CATEGORIES },
+          { query: QUERY_CATEGORY_BY_TYPE, variables: { type: "Income" } },
+        ],
       });
       setCategories([
         ...categories,
@@ -91,13 +82,7 @@ const CategoryComponent = () => {
       variables: {
         category: categoryId,
       },
-    });
-  };
-  const handleEditCategory = (categoryId) => {
-    editCategory({
-      variables: {
-        id: categoryId,
-      },
+      refetchQueries: [{ query: QUERY_ALL_CATEGORIES }],
     });
   };
 
@@ -144,11 +129,11 @@ const CategoryComponent = () => {
               Add Category
             </Button>
           </div>
-          <div>
+          <div className="m-auto">
             <FormGroup className="m-3">
               <FormCheck
                 type="checkbox"
-                label="Add as income"
+                label="Add as Income"
                 checked={isIncome}
                 onChange={handleIsIncome}
               />
